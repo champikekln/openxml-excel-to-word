@@ -1,26 +1,33 @@
-﻿using DocumentFormat.OpenXml;
+﻿using ChartFromExcelToWord;
+using ChartFromExcelToWord.Common.enums;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace ConsoleApp1
 {
-    public class ChartOperations
+    public class ChartOperations : CommonOperations
     {
-        private string chartName = "chart1";
-        private string chartCaption = "caption1";
-        private string primaryLabel = "Chart1 - Primary Label";
-        private string secondaryLabel = "Chart1 - Secondary Label";
+        private string _chartName = "chart1";
+        private string _chartCaption = "caption1";
+        private string _primaryLabel = "Chart1 - Primary Label";
+        private string _secondaryLabel = "Chart1 - Secondary Label";
+        private CustomJustification _justification = CustomJustification.Center;
+        private bool _isBold = true;
+        private bool _isItalic = true;
+        private string _fontColor = "000000";
+
         public bool AddChartObjectToWordDoc(ref MainDocumentPart mainPart, DrawingsPart drawingPart)
         {
             string relId;
-            string chartNameInExcel = string.Format("{0}{1}{2}", "/xl/charts/", chartName, ".xml");
+            string chartNameInExcel = string.Format("{0}{1}{2}", "/xl/charts/", _chartName, ".xml");
             ChartPart selectedChartPart = (ChartPart)drawingPart.ChartParts.FirstOrDefault(x => x.Uri.OriginalString.Equals(chartNameInExcel));
 
             if (selectedChartPart != null)
             {
-                AddPrimaryLabel(ref mainPart, primaryLabel, true);
-                AddSecondaryLabel(ref mainPart, secondaryLabel, false);
+                AddLabel(ref mainPart, _primaryLabel, _isBold, _fontColor, _isItalic, _justification);
+                AddSecondaryLabel(ref mainPart, _secondaryLabel, false);
 
                 ChartPart importedChartPart = mainPart.AddPart<ChartPart>(selectedChartPart);
                 relId = string.Format("{0}{1}", "R", Guid.NewGuid().ToString());
@@ -33,7 +40,7 @@ namespace ConsoleApp1
                 DocumentFormat.OpenXml.Wordprocessing.Drawing drawing = new DocumentFormat.OpenXml.Wordprocessing.Drawing();
                 DocumentFormat.OpenXml.Drawing.Wordprocessing.Inline inline = new DocumentFormat.OpenXml.Drawing.Wordprocessing.Inline();
                 inline.Append(new DocumentFormat.OpenXml.Drawing.Wordprocessing.Extent() { Cx = 5274310L, Cy = 3076575L });
-                DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties docPros = new DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties() { Id = (UInt32Value)1U, Name = chartName };
+                DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties docPros = new DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties() { Id = (UInt32Value)1U, Name = _chartName };
                 inline.Append(docPros);
                 DocumentFormat.OpenXml.Drawing.Graphic g = new DocumentFormat.OpenXml.Drawing.Graphic();
                 var graphicData = new DocumentFormat.OpenXml.Drawing.GraphicData() { Uri = "http://schemas.openxmlformats.org/drawingml/2006/chart" };
@@ -49,29 +56,6 @@ namespace ConsoleApp1
             }
             return true;
         }
-
-        private void AddPrimaryLabel(ref MainDocumentPart mainPart, string value, bool isboldText = true)
-        {
-            Paragraph p = new Paragraph();
-            ParagraphProperties pp = new ParagraphProperties();
-            pp.Justification = new Justification() { Val = JustificationValues.Center };
-            p.Append(pp);
-            DocumentFormat.OpenXml.Wordprocessing.Run r = new DocumentFormat.OpenXml.Wordprocessing.Run();
-
-            if (isboldText)
-            {
-                RunProperties runProperties = r.AppendChild(new RunProperties());
-                DocumentFormat.OpenXml.Wordprocessing.Bold bold = new DocumentFormat.OpenXml.Wordprocessing.Bold();
-                bold.Val = OnOffValue.FromBoolean(true);
-                runProperties.AppendChild(bold);
-            }
-
-            Text t = new Text(value) { Space = SpaceProcessingModeValues.Preserve };
-            r.Append(t);
-            p.Append(r);
-            mainPart.Document.Body.Append(p);
-        }
-
         private void AddChartCaption(string caption, string name, ref MainDocumentPart mainPart)
         {
             if (!string.IsNullOrEmpty(caption))
