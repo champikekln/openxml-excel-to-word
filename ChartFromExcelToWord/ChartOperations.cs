@@ -9,17 +9,18 @@ namespace ConsoleApp1
 {
     public class ChartOperations : CommonOperations
     {
-        public string _chartName { get; set; } = "chart1";
-        public string _chartCaption { get; set; } = "caption1";
-        public string _primaryLabel { get; set; } = "Chart1 - Primary Label";
-        public CustomJustification _justification { get; set; } = CustomJustification.Center;
-        public bool _isBold { get; set; } = true;
-        public bool _isItalic { get; set; } = true;
-        public string _fontColor { get; set; } = "000000";
-        public bool _isUnderlined { get; set; } = true;
-        public string _fontSize { get; set; } = "24";
+        private ILabelOperations _labelOperations { get; set; }
+        private string _chartName { get; set; } = "chart1";
+        private string _chartCaption { get; set; } = "caption1";
+        private string _primaryLabel { get; set; } = "Chart1 - Primary Label";
+        private CustomJustification _justification { get; set; } = CustomJustification.Center;
+        private bool _isBold { get; set; } = true;
+        private bool _isItalic { get; set; } = true;
+        private string _fontColor { get; set; } = "000000";
+        private bool _isUnderlined { get; set; } = true;
+        private string _fontSize { get; set; } = "24";
 
-        public ChartOperations(ref MainDocumentPart mainPart, DrawingsPart drawingPart, ChartProperties chartProps)
+        public ChartOperations(ref MainDocumentPart mainPart, DrawingsPart drawingPart, ChartProperties chartProps, ILabelOperations labelOperations)
         {
             _chartName = chartProps.chartName;
             _chartCaption = chartProps.chartCaption;
@@ -29,6 +30,8 @@ namespace ConsoleApp1
             _isItalic = chartProps.isItalic;
             _fontColor = chartProps.fontColor;
             _fontSize = chartProps.fontSize;
+            _labelOperations = labelOperations;
+
             AddChartObjectToWordDoc(ref mainPart, drawingPart);
         }
 
@@ -40,7 +43,11 @@ namespace ConsoleApp1
 
             if (selectedChartPart != null)
             {
-                if (!string.IsNullOrEmpty(_primaryLabel)) AddLabel(ref mainPart, _primaryLabel, _isBold, _fontColor, _isItalic, _isUnderlined, _fontSize, _justification);
+                if (!string.IsNullOrEmpty(_primaryLabel))
+                {
+                    _labelOperations.AddLabel(ref mainPart, new LabelProps() { fontColor = _fontColor, fontSize = _fontSize, isBoldText = _isBold, isItalic = _isItalic, isUnderline = _isUnderlined, labelValue = _primaryLabel });
+                }
+
                 ChartPart importedChartPart = mainPart.AddPart<ChartPart>(selectedChartPart);
                 relId = string.Format("{0}{1}", "R", Guid.NewGuid().ToString());
                 ChartPart chartPart = mainPart.AddNewPart<ChartPart>(relId);
@@ -118,13 +125,13 @@ namespace ConsoleApp1
     public class ChartProperties
     {
         public string chartName { get; set; }
-        public string chartCaption { get; set; } 
+        public string chartCaption { get; set; }
         public string primaryLabel { get; set; }
-        public CustomJustification justification { get; set; } 
+        public CustomJustification justification { get; set; }
         public bool isBold { get; set; }
         public bool isItalic { get; set; }
         public string fontColor { get; set; }
-        public bool isUnderlined { get; set; } 
-        public string fontSize { get; set; } 
+        public bool isUnderlined { get; set; }
+        public string fontSize { get; set; }
     }
 }

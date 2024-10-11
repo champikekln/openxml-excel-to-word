@@ -29,11 +29,12 @@ try
                 {
                     try
                     {
+                        ILabelOperations objLabel = new LabelOperations();
                         MainDocumentPart mainPart = docx.MainDocumentPart;
-                        ChartOperations objChart1 = new ChartOperations(ref mainPart, drawingPart, new ChartProperties() { chartName= "chart1", chartCaption="Chart 1", primaryLabel ="Chart 1 Primary Label", isBold =true, isItalic =true, fontColor = "000000", isUnderlined=true, fontSize="24" });
+                        ChartOperations objChart1 = new ChartOperations(ref mainPart, drawingPart, new ChartProperties() { chartName= "chart1", chartCaption="Chart 1", primaryLabel ="Chart 1 Primary Label", isBold =true, isItalic =true, fontColor = "000000", isUnderlined=true, fontSize="24" }, objLabel);
                         CommonOperations objCommonOperations = new CommonOperations();
                         objCommonOperations.AddPageBreak(ref mainPart);
-                        ChartOperations objChart2 = new ChartOperations(ref mainPart, drawingPart, new ChartProperties() { chartName = "chart1", chartCaption = "Chart 2", primaryLabel = "Chart 2 Primary Label", isBold = true, isItalic = true, fontColor = "000000", isUnderlined = true, fontSize = "24" });
+                        ChartOperations objChart2 = new ChartOperations(ref mainPart, drawingPart, new ChartProperties() { chartName = "chart1", chartCaption = "Chart 2", primaryLabel = "Chart 2 Primary Label", isBold = true, isItalic = true, fontColor = "000000", isUnderlined = true, fontSize = "24" }, objLabel);
                     }
                     finally
                     {
