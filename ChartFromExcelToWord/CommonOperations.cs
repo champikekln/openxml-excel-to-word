@@ -52,6 +52,12 @@ namespace ChartFromExcelToWord
             mainPart.Document.Body.Append(p);
         }
 
+        public void AddPageBreak(ref MainDocumentPart mainPart)
+        {
+            Paragraph PageBreakParagraph = new Paragraph(new DocumentFormat.OpenXml.Wordprocessing.Run(new DocumentFormat.OpenXml.Wordprocessing.Break() { Type = BreakValues.Page }));
+            mainPart.Document.Body.Append(PageBreakParagraph);
+        }
+
         private JustificationValues GetJustificationValue(CustomJustification justification)
         {
             return justification switch
