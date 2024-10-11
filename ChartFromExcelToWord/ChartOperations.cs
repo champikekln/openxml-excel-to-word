@@ -17,6 +17,8 @@ namespace ConsoleApp1
         private bool _isBold = true;
         private bool _isItalic = true;
         private string _fontColor = "000000";
+        private bool _isUnderlined = true;
+        private string _fontSize = "24";
 
         public bool AddChartObjectToWordDoc(ref MainDocumentPart mainPart, DrawingsPart drawingPart)
         {
@@ -26,7 +28,7 @@ namespace ConsoleApp1
 
             if (selectedChartPart != null)
             {
-                AddLabel(ref mainPart, _primaryLabel, _isBold, _fontColor, _isItalic, _justification);
+                AddLabel(ref mainPart, _primaryLabel, _isBold, _fontColor, _isItalic, _isUnderlined, _fontSize, _justification);
                 AddSecondaryLabel(ref mainPart, _secondaryLabel, false);
 
                 ChartPart importedChartPart = mainPart.AddPart<ChartPart>(selectedChartPart);

@@ -7,7 +7,8 @@ namespace ChartFromExcelToWord
 {
     public class CommonOperations
     {
-        public void AddLabel(ref MainDocumentPart mainPart, string value, bool isBoldText = true, string hexColor = "000000", bool isItalic = false, CustomJustification justification = CustomJustification.Center)
+        public void AddLabel(ref MainDocumentPart mainPart, string value, bool isBoldText = true, string hexColor = "000000", bool isItalic = false, 
+            bool isUnderline = false, string fontSize = "24", CustomJustification justification = CustomJustification.Center)
         {
             Paragraph p = new Paragraph();
             ParagraphProperties pp = new ParagraphProperties();
@@ -31,14 +32,21 @@ namespace ChartFromExcelToWord
                 runProperties.Append(italic);
             }
 
+            if (isUnderline)
+            {
+                DocumentFormat.OpenXml.Wordprocessing.Underline underline = new DocumentFormat.OpenXml.Wordprocessing.Underline() { Val = UnderlineValues.Single };
+                runProperties.Append(underline);
+            }
+
             DocumentFormat.OpenXml.Wordprocessing.Color color = new DocumentFormat.OpenXml.Wordprocessing.Color() { Val = hexColor };
             runProperties.Append(color);
 
-            r.Append(runProperties);
+            DocumentFormat.OpenXml.Wordprocessing.FontSize fontSizeElement = new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = fontSize };
+            runProperties.Append(fontSizeElement);
 
+            r.Append(runProperties);
             Text t = new Text(value) { Space = SpaceProcessingModeValues.Preserve };
             r.Append(t);
-
             p.Append(r);
 
             mainPart.Document.Body.Append(p);
