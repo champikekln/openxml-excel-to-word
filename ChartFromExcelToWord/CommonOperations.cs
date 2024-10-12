@@ -13,7 +13,7 @@ namespace ChartFromExcelToWord
             mainPart.Document.Body.Append(PageBreakParagraph);
         }
 
-        public static void AddNewLine(ref MainDocumentPart mainPart)
+        public void AddNewLine(ref MainDocumentPart mainPart)
         {
             Paragraph p = new Paragraph();
             ParagraphProperties pp = new ParagraphProperties();
