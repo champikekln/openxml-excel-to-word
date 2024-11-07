@@ -1,0 +1,14 @@
+﻿-------------------------------------------------------
+1. Hard coded excel with a static chart
+2. Copy static chart into word file and save
+3. Add label text to the excel file
+4. Generate chart in the excel file with given data
+5. Copy chart into word file and save
+6. Dynamically provide parameters for drawing the chart in the excel (Any type of chart can be saved on the word file)
+	6.1. Generate Classes for the chart
+	6.2. Create Excel file template with chart table information
+7. Add multiple charts in the word file
+8. Use json file to provide data for the chart and preparin the word file
+9. Generate Drag and Drop Document builder is the last goal of this project
+
+

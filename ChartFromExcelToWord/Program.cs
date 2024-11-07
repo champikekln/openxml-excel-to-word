@@ -1,5 +1,6 @@
 ﻿
 using ChartFromExcelToWord;
+using ChartFromExcelToWord.ExcelOperations;
 using ConsoleApp1;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -13,6 +14,8 @@ try
     string excelPath = @"Book1.xlsx";
     string docPath = @"Doc1.docx";
     Sheet selectedSheet = null;
+
+    ExcelOperations obj = new ExcelOperations();
 
     using (var fileStream = new FileStream(excelPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
     {
