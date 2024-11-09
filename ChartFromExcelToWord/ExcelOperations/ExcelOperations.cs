@@ -1,14 +1,23 @@
 ﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
-using System.Data;
-using System.IO;
-using static ChartFromExcelToWord.DynamicCharts.DynamicCharts;
+using DataTable = System.Data.DataTable;
+using Formula = DocumentFormat.OpenXml.Drawing.Charts.Formula;
+using Values = DocumentFormat.OpenXml.Drawing.Charts.Values;
 
 namespace ChartFromExcelToWord.ExcelOperations
 {
-    public class ExcelOperations
+    public class ExcelOperations: InteropOperations
     {
+
+        private string xAxisColumn { get; set; }
+        private string yAxisColumn { get; set; }
+        private int startRow { get; set; }
+        private int endRow { get; set; }
+        private string sheetName { get; set; }
+        private string chartName { get; set; }
+        private string filePath { get; set; }
+        private DataTable chartTable { get; set; }
 
         public ExcelOperations()
         {
@@ -23,34 +32,33 @@ namespace ChartFromExcelToWord.ExcelOperations
             dataTable.Rows.Add("Samuel Johnson2", 2000);
             dataTable.Rows.Add("Samuel Johnson3", 56000);
 
-            string filePath = @"Book1.xlsx";
+
+            chartTable = dataTable;
+            xAxisColumn = "A";
+            yAxisColumn = "B";
+            startRow = 2;
+            endRow = dataTable.Rows.Count;
+            filePath = @"C:\Champike\GitHub\openxml-excel-to-word\ChartFromExcelToWord\bin\Debug\net8.0\Book1.xlsx";
+            chartName = "chart1";
+            sheetName = "Sheet1";
 
             WriteDataTableToExcel(filePath, dataTable);
-
-            ChartTableDef objChartDef1 = new ChartTableDef();
-            objChartDef1.Id = 1;
-            objChartDef1.Name = "Chart1";
-            objChartDef1.Title = "Chart 1";
-            objChartDef1.XAxisTitle = "X Axis";
-            objChartDef1.YAxisTitle = "Y Axis";
-            objChartDef1.startingColumnIndex = 1;
-            objChartDef1.startingRowIndex = 2;
-            objChartDef1.chartType = "Column";
-            objChartDef1.Columns = new List<ChartTableColumn>() { new ChartTableColumn() { Id = 1, Name = "Name", Format = "string", columnIndex = 1 }, new ChartTableColumn() { Id = 2, Name = "Salary", Format = "double", columnIndex = 2 } };
         }
 
         private void WriteDataTableToExcel(string filePath, DataTable dataTable)
         {
-            using (var workbook = new XLWorkbook(filePath))
+            ReArrangeChartData();
+            using (var workbook = new XLWorkbook("Book1.xlsx"))
             {
                 try
                 {
-                    var worksheet = workbook.Worksheet("Sheet1");
-                    var lastRow = worksheet.LastRowUsed().RowNumber();
+                    var worksheet = workbook.Worksheet(sheetName);
+                    var lastRow = startRow;
 
                     for (int i = 0; i < dataTable.Rows.Count; i++)
                     {
-                        for (int j = 0; j < dataTable.Columns.Count; j++)
+                        for (int j = 0;
+                            j < dataTable.Columns.Count; j++)
                         {
                             var value = dataTable.Rows[i][j];
 
@@ -72,7 +80,6 @@ namespace ChartFromExcelToWord.ExcelOperations
                             }
                         }
                     }
-                    //workbook.CalculateMode = ClosedXML.Excel.XLCalculateMode.Auto;
                     workbook.ForceFullCalculation = true;
                     workbook.CalculationOnSave = true;
                     workbook.Save();
@@ -82,53 +89,55 @@ namespace ChartFromExcelToWord.ExcelOperations
                     workbook.Dispose();
                 }
             }
-            InteropOperations.RecalCulate(filePath);
+            RecalCulate(filePath);
         }
 
-        private void WriteDataTableToExcel1(string filePath)
+        private void ReArrangeChartData()
         {
-            using (var workbook = new XLWorkbook(filePath))
+            using (SpreadsheetDocument document = SpreadsheetDocument.Open(filePath, true))
             {
-                try
+                WorkbookPart workbookPart = document.WorkbookPart;
+                WorksheetPart worksheetPart = workbookPart.WorksheetParts.First();
+
+                var drawingPart = worksheetPart.DrawingsPart;
+                if (drawingPart == null) return;
+
+                foreach (var chartPart in drawingPart.ChartParts)
                 {
-                    workbook.Save();
-                }
-                finally
-                {
-                    workbook.Dispose();
+                    Chart chart = chartPart.ChartSpace.Elements<Chart>().First();
+
+                    string chartNameInExcel = $"/xl/charts/{chartName}.xml";
+                    if (chartPart.Uri.ToString() == chartNameInExcel)
+                    {
+                        var chartSeries = chart.Descendants<PieChartSeries>().FirstOrDefault();
+                        if (chartSeries != null)
+                        {
+                            //Set Y axis data
+                            var values = chartSeries.Descendants<Values>().FirstOrDefault();
+                            if (values != null)
+                            {
+                                var formula = values.Descendants<Formula>().FirstOrDefault();
+                                if (formula != null)
+                                {
+                                    formula.Text = $"{sheetName}!${yAxisColumn}${startRow}:${yAxisColumn}${endRow}";
+                                }
+                            }
+                            //Set X axis data
+                            var categoryAxisData = chartSeries.Descendants<CategoryAxisData>().FirstOrDefault();
+                            if (categoryAxisData != null)
+                            {
+                                var formula = categoryAxisData.Descendants<Formula>().FirstOrDefault();
+                                if (formula != null)
+                                {
+                                    formula.Text = $"{sheetName}!${xAxisColumn}${startRow}:${xAxisColumn}${endRow}";
+                                }
+                            }
+                        }
+                        document.Save();
+                        break;
+                    }
                 }
             }
         }
-
-
-
-        //private void WriteDataTableToExcel(string filePath, DataTable dataTable)
-        //{
-        //    using (var workbook = new XLWorkbook())
-        //    {
-        //        var worksheet = workbook.Worksheets.Add("Sheet1");
-
-        //        for (int i = 1; i < dataTable.Rows.Count; i++)
-        //        {
-        //            for (int j = 0; j < dataTable.Columns.Count; j++)
-        //            {
-        //                var cellValue = dataTable.Rows[i][j] != null ? dataTable.Rows[i][j].ToString() : string.Empty;
-        //                worksheet.Cell(i + 1, j + 1).Value = cellValue; 
-        //            }
-        //        }
-        //        workbook.Save();
-        //    }
-        //}
-
-        //private static void WriteDataTableToExcel(string filePath, DataTable dataTable)
-        //{
-        //    using (var workbook = new XLWorkbook())
-        //    {
-        //        var worksheet = workbook.Worksheets.Add("Sheet1");
-        //        worksheet.Cell(1, 1).InsertTable(dataTable);
-        //        workbook.SaveAs(filePath);
-
-        //    }
-        //}
     }
 }
