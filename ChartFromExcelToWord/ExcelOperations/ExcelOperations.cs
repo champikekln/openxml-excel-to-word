@@ -7,9 +7,8 @@ using Values = DocumentFormat.OpenXml.Drawing.Charts.Values;
 
 namespace ChartFromExcelToWord.ExcelOperations
 {
-    public class ExcelOperations: InteropOperations
+    public class ExcelOperations : InteropOperations
     {
-
         private string xAxisColumn { get; set; }
         private string yAxisColumn { get; set; }
         private int startRow { get; set; }
@@ -19,30 +18,18 @@ namespace ChartFromExcelToWord.ExcelOperations
         private string filePath { get; set; }
         private DataTable chartTable { get; set; }
 
-        public ExcelOperations()
+        public ExcelOperations(string xAxisColumnVal, string yAxisColumnVal, int startRowVal, int endRowVal, string sheetNameVal, string chartNameVal, string filepathVal, DataTable chartTableVal)
         {
-            DataTable dataTable = new DataTable();
-            dataTable.Columns.Add("Name", typeof(string));
-            dataTable.Columns.Add("Salary", typeof(double));
+            xAxisColumn = xAxisColumnVal;
+            yAxisColumn = yAxisColumnVal;
+            startRow = startRowVal;
+            endRow = endRowVal;
+            sheetName = sheetNameVal;
+            chartName = chartNameVal;
+            filePath = filepathVal;
+            chartTable = chartTableVal;
 
-            dataTable.Rows.Add("John Doe", 1000);
-            dataTable.Rows.Add("Jane Smith", 60000);
-            dataTable.Rows.Add("Samuel Johnson", 1000);
-            dataTable.Rows.Add("Samuel Johnson1", 55000);
-            dataTable.Rows.Add("Samuel Johnson2", 2000);
-            dataTable.Rows.Add("Samuel Johnson3", 56000);
-
-
-            chartTable = dataTable;
-            xAxisColumn = "A";
-            yAxisColumn = "B";
-            startRow = 2;
-            endRow = dataTable.Rows.Count;
-            filePath = @"C:\Champike\GitHub\openxml-excel-to-word\ChartFromExcelToWord\bin\Debug\net8.0\Book1.xlsx";
-            chartName = "chart1";
-            sheetName = "Sheet1";
-
-            WriteDataTableToExcel(filePath, dataTable);
+            WriteDataTableToExcel(filePath, chartTable);
         }
 
         private void WriteDataTableToExcel(string filePath, DataTable dataTable)
@@ -57,8 +44,7 @@ namespace ChartFromExcelToWord.ExcelOperations
 
                     for (int i = 0; i < dataTable.Rows.Count; i++)
                     {
-                        for (int j = 0;
-                            j < dataTable.Columns.Count; j++)
+                        for (int j = 0; j < dataTable.Columns.Count; j++)
                         {
                             var value = dataTable.Rows[i][j];
 
